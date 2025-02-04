@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - File Manager{% endblock %}
+
+{% block content %}
+    <h2>Uploaded Files</h2>
+    <ul>
+        {% for file in files %}
+            <li>
+                {{ file.file.name }}
+                <a href="{{ file.file.url }}" target="_blank" download>Download</a>
+            </li>
+        {% empty %}
+            <p>No files uploaded yet.</p>
+        {% endfor %}
+    </ul>
+
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+
+    <hr>
+
+    <h2>Upload a File</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="file">Select file:</label>
+        <input type="file" name="file" id="file"><br><br>
+        <label for="upload_directory">Upload Directory (optional):</label>
+        <input type="text" name="upload_directory" id="upload_directory" placeholder="e.g., myfolder"><br><br>
+        <button type="submit">Upload</button>
+    </form>
+
+    <hr>
+
+    <h2>Create a New Directory</h2>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="create_directory" value="1">
+        <label for="directory_name">Directory Name:</label>
+        <input type="text" name="directory_name" id="directory_name" placeholder="New directory name"><br><br>
+        <button type="submit">Create Directory</button>
+    </form>
+
+    <hr>
+
+    <h2>Existing Directories</h2>
+    <ul>
+        {% for d in directories %}
+            <li><a href="/{{ d }}/">{{ d }}</a></li>
+        {% empty %}
+            <p>No directories available.</p>
+        {% endfor %}
+    </ul>
+{% endblock %}
