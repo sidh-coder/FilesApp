@@ -1,24 +1,106 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}File Manager{% endblock %}</title>
+  <meta charset="UTF-8" />
+  <title>{% block title %}File Dashboard{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
 </head>
 <body>
-    <header>
-        <h1><a href="/">File Manager</a></h1>
-        <hr>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <!-- Replace 'S' with the user's first initial or a logo if desired -->
+      <h1 class="sidebar-logo">
+        {{ user.username|default:"S" }}
+      </h1>
+    </div>
+    <nav class="sidebar-nav">
+      <ul>
+        <!-- Dashboard: link to your home view -->
+        <li class="active">
+          <a href="{% url 'file_list' %}">
+            <span class="nav-icon">🏠</span> Dashboard
+          </a>
+        </li>
+        <!-- Folders: might link to same as Dashboard or a different URL if you prefer -->
+        <li>
+          <a href="{% url 'file_list' %}">
+            <span class="nav-icon">📂</span> Folders
+          </a>
+        </li>
+        <!-- Settings: dummy link for now -->
+        <li>
+          <a href="#">
+            <span class="nav-icon">⚙</span> Settings
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <div class="sidebar-user">
+      <img 
+        src="https://via.placeholder.com/40" 
+        alt="User Avatar" 
+        class="user-avatar"
+      />
+      <span class="username">{{ user.username }}</span>
+    </div>
+    <!-- Logout form (optional place) -->
+    {% if user.is_authenticated %}
+      <form action="{% url 'logout' %}" method="post" class="logout-form">
+        {% csrf_token %}
+        <button type="submit">Sign Out</button>
+      </form>
+    {% endif %}
+  </aside>
+
+  <!-- MAIN WRAPPER -->
+  <div class="main-wrapper">
+    <!-- TOP BAR -->
+    <header class="top-bar">
+      <div class="search-bar">
+        <input type="text" placeholder="Search (dummy)..." />
+      </div>
+      <div class="top-bar-actions">
+        <!-- Dummy icons for email & notifications -->
+        <span class="icon">✉</span>
+        <span class="icon">🔔</span>
+        <!-- Dummy time/date -->
+        <div class="date-time">
+          <strong>17:30</strong>
+          <span>18 August</span>
+        </div>
+      </div>
     </header>
 
-    <main>
-        {% block content %}
-        {% endblock %}
+    <!-- MAIN CONTENT (Django block) -->
+    <main class="main-content">
+      {% block content %}
+      {% endblock %}
     </main>
+  </div>
 
-    <footer>
-        <hr>
-        <p>&copy; 2025 File Manager</p>
-    </footer>
+  <!-- RIGHT PANEL -->
+  <aside class="right-panel">
+    <h2>System Usage (Dummy)</h2>
+    <div class="task-card">
+      <p>CPU Usage</p>
+      <span>Design</span>
+    </div>
+    <div class="task-card">
+      <p>RAM Usage</p>
+      <span>Marketing</span>
+    </div>
+    <div class="task-card">
+      <p>Disk IO</p>
+      <span>Development</span>
+    </div>
+    <div class="task-card">
+      <p>Network</p>
+      <span>Design</span>
+    </div>
+  </aside>
+
 </body>
 </html>

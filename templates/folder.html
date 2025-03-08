@@ -1,32 +1,86 @@
 {% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}  {# Load our custom filter for endswith, if used #}
 
-{% block title %}{{ folder_name }} - File Manager{% endblock %}
+{% block title %}{{ folder_path }} - File Manager{% endblock %}
 
 {% block content %}
-    <h2>Folder: {{ folder_name }}</h2>
-    <a href="/">← Back to Home</a>
-    <hr>
+<div class="dashboard-container">
 
-    <h3>Files in this folder</h3>
-    <ul>
-        {% for file in files %}
-            <li>
-                {{ file.file.name }}
-                <a href="{{ file.file.url }}" target="_blank" download>Download</a>
-            </li>
-        {% empty %}
-            <p>No files in this folder.</p>
-        {% endfor %}
-    </ul>
+  <!-- Folder Header -->
+  <div class="folder-header">
+    <h2>Folder: {{ folder_path }}</h2>
+    <a href="{% url 'file_list' %}" class="back-btn">← Back to Home</a>
+  </div>
+  <hr>
 
-    <hr>
+  <!-- Status Message -->
+  {% if message %}
+    <p class="status-message">{{ message }}</p>
+  {% endif %}
 
-    <h3>Upload a File to {{ folder_name }}</h3>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="file" name="file" required>
-        <input type="hidden" name="upload_directory" value="{{ folder_name }}">
-        <button type="submit">Upload</button>
+  <!-- Create Subfolder Section -->
+  <section class="create-folder-section">
+    <form method="post">
+      {% csrf_token %}
+      <input type="text" name="directory_name" placeholder="New folder name" required>
+      <button type="submit" name="create_directory" class="create-folder-btn">
+        <span class="folder-icon">📁</span> + Create Directory
+      </button>
     </form>
-    
+  </section>
+  <hr>
+
+<!-- Subfolders Grid -->
+{% if subfolders %}
+<section class="folders-section">
+  <h3>Subfolders</h3>
+  <div class="folder-grid">
+    {% for folder in subfolders %}
+      <a href="{% url 'folder_view' folder_path=folder_path|add:'/'|add:folder %}" class="folder-card">
+        <div class="folder-icon">📁</div>
+        <p>{{ folder }}</p>
+      </a>
+    {% endfor %}
+  </div>
+  <hr>
+</section>
+{% endif %}
+
+
+  <!-- Files Section -->
+  <section class="files-section">
+    <h3>Files in this folder</h3>
+    <div class="file-grid">
+      {% for file in files %}
+        <div class="file-card">
+          <div class="file-preview">
+            {% if file.file.name|lower|slice:"-4" == ".png" or file.file.name|lower|slice:"-4" == ".jpg" or file.file.name|lower|slice:"-5" == ".jpeg" or file.file.name|lower|slice:"-4" == ".gif" %}
+              <img src="{{ file.file.url }}" alt="File preview">
+            {% else %}
+              <div class="file-icon">📄</div>
+            {% endif %}
+          </div>
+          <p class="file-name">{{ file.file.name|truncatechars:20 }}</p>
+          <a href="{{ file.file.url }}" target="_blank" download class="download-link">Download</a>
+        </div>
+      {% empty %}
+        <p>No files in this folder.</p>
+      {% endfor %}
+    </div>
+  </section>
+  <hr>
+
+  <!-- Upload File Section -->
+  <section class="upload-file-section">
+    <form method="post" enctype="multipart/form-data" class="upload-file-form">
+      {% csrf_token %}
+      <label for="file" class="upload-btn">
+        <span class="upload-icon">⬆</span> Upload File
+      </label>
+      <input type="file" id="file" name="file" style="display:none;" onchange="this.form.submit()">
+    </form>
+  </section>
+
+</div>
 {% endblock %}

@@ -1,55 +1,82 @@
-{% extends 'base.html' %}
 
-{% block title %}Home - File Manager{% endblock %}
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% load static %}
+
+{% block title %}Dashboard - File Manager{% endblock %}
 
 {% block content %}
+<div class="dashboard-container">
+
+<!-- FOLDERS SECTION -->
+<section class="folders-section">
+    <h2>Folders</h2>
+    <div class="folder-grid">
+      {% for d in directories %}
+        <a href="/{{ d }}/" class="folder-card">
+          <div class="folder-icon">📁</div>
+          <p>{{ d }}</p>
+        </a>
+      {% empty %}
+        <p>No folders yet.</p>
+      {% endfor %}
+    </div>
+  </section>
+  
+
+    <!-- CREATE FOLDER BUTTON & FORM -->
+    <form method="post" class="create-folder-form">
+      {% csrf_token %}
+      <input type="hidden" name="create_directory" value="1">
+      <label for="directory_name" class="hidden-label">Folder Name</label>
+      <input type="text" name="directory_name" id="directory_name" placeholder="New folder name" required>
+      <button type="submit" class="create-folder-btn">
+        <span class="folder-icon">📁</span> + Create Directory
+      </button>
+    </form>
+  </section>
+
+  <!-- FILES SECTION -->
+  <section class="files-section">
     <h2>Uploaded Files</h2>
-    <ul>
-        {% for file in files %}
-            <li>
-                {{ file.file.name }}
-                <a href="{{ file.file.url }}" target="_blank" download>Download</a>
-            </li>
-        {% empty %}
-            <p>No files uploaded yet.</p>
-        {% endfor %}
-    </ul>
+    <div class="file-grid">
+      {% for file in files %}
+        <div class="file-card">
+          <div class="file-preview">
+            {% comment %}
+              Check if the file is an image (png/jpg/jpeg/gif) for preview.
+              Otherwise, show a generic file icon.
+            {% endcomment %}
+            {% if file.file.name|lower|endswith:".png" or file.file.name|lower|endswith:".jpg" or file.file.name|lower|endswith:".jpeg" or file.file.name|lower|endswith:".gif" %}
+              <img src="{{ file.file.url }}" alt="File preview">
+            {% else %}
+              <div class="file-icon">📄</div>
+            {% endif %}
+          </div>
+          <!-- Truncate the file name if it's too long -->
+          <p class="file-name">{{ file.file.name|truncatechars:20 }}</p>
+          <a href="{{ file.file.url }}" target="_blank" download class="download-link">Download</a>
+        </div>
+      {% empty %}
+        <p>No files uploaded yet.</p>
+      {% endfor %}
+    </div>
 
-    {% if message %}
-        <p>{{ message }}</p>
-    {% endif %}
-
-    <hr>
-
-    <h2>Upload a File</h2>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <label for="file">Select file:</label>
-        <input type="file" name="file" id="file"><br><br>
-        <label for="upload_directory">Upload Directory (optional):</label>
-        <input type="text" name="upload_directory" id="upload_directory" placeholder="e.g., myfolder"><br><br>
-        <button type="submit">Upload</button>
+    <!-- UPLOAD FILE BUTTON -->
+    <form method="post" enctype="multipart/form-data" class="upload-file-form">
+      {% csrf_token %}
+      <label for="file" class="upload-btn">
+        <span class="upload-icon">⬆</span> Upload File
+      </label>
+      <input
+        type="file"
+        id="file"
+        name="file"
+        style="display: none;"
+        onchange="this.form.submit()"  <!-- auto-submit when a file is chosen -->
+      />
     </form>
-
-    <hr>
-
-    <h2>Create a New Directory</h2>
-    <form method="post">
-        {% csrf_token %}
-        <input type="hidden" name="create_directory" value="1">
-        <label for="directory_name">Directory Name:</label>
-        <input type="text" name="directory_name" id="directory_name" placeholder="New directory name"><br><br>
-        <button type="submit">Create Directory</button>
-    </form>
-
-    <hr>
-
-    <h2>Existing Directories</h2>
-    <ul>
-        {% for d in directories %}
-            <li><a href="/{{ d }}/">{{ d }}</a></li>
-        {% empty %}
-            <p>No directories available.</p>
-        {% endfor %}
-    </ul>
+  </section>
+</div>
 {% endblock %}
